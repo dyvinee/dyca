@@ -9,7 +9,7 @@ interface DycaObject {
     string inspect();
 }
 
-class Integer : Object {
+class Integer : DycaObject {
     long value;
     
     this(long value) { this.value = value; }
@@ -18,7 +18,7 @@ class Integer : Object {
     override string inspect() { return value.to!string; }
 }
 
-class Boolean : Object {
+class Boolean : DycaObject {
     bool value;
     
     this(bool value) { this.value = value; }
@@ -27,12 +27,12 @@ class Boolean : Object {
     override string inspect() { return value ? "true" : "false"; }
 }
 
-class Null : Object {
+class Null : DycaObject {
     override string objectType() { return "NULL"; }
     override string inspect() { return "null"; }
 }
 
-class ReturnValue : Object {
+class ReturnValue : DycaObject {
     Object value;
     
     this(Object value) { this.value = value; }
@@ -41,7 +41,7 @@ class ReturnValue : Object {
     override string inspect() { return value.inspect(); }
 }
 
-class DycaError : Object {
+class DycaError : DycaObject {
     string message;
     
     this(string message) { this.message = message; }
@@ -51,14 +51,14 @@ class DycaError : Object {
 }
 
 class Environment {
-    Object[string] store;
+    DycaObject[string] store;
     Environment outer;
     
     this(Environment outer = null) {
         this.outer = outer;
     }
     
-    Object get(string name) {
+    DycaObject get(string name) {
         if (name in store) {
             return store[name];
         } else if (outer !is null) {
@@ -67,7 +67,7 @@ class Environment {
         return null;
     }
     
-    Object set(string name, Object val) {
+    DycaObject set(string name, DycaObject val) {
         store[name] = val;
         return val;
     }

@@ -1,14 +1,14 @@
 module stdlib.io;
 
-import core.object : Object;
+import core.object : DycaObject, DycaError, Null, String;
 import core.ast : Builtin;
 import std.stdio : write, writeln, readln;
 import std.conv : to;
 
 class PrintFunction : Builtin {
-    override Object call(Object[] args) {
+    override DycaObject call(DycaObject[] args) { 
         if (args.length != 1) {
-            return new Error("wrong number of arguments. got=%d, want=1".format(args.length));
+            return new DycaError("wrong number of arguments. got=%d, want=1".format(args.length));
         }
         
         write(args[0].inspect());
@@ -17,9 +17,9 @@ class PrintFunction : Builtin {
 }
 
 class PrintlnFunction : Builtin {
-    override Object call(Object[] args) {
+    override DycaObject call(DycaObject[] args) { 
         if (args.length != 1) {
-            return new Error("wrong number of arguments. got=%d, want=1".format(args.length));
+            return new DycaError("wrong number of arguments. got=%d, want=1".format(args.length));
         }
         
         writeln(args[0].inspect());
@@ -28,7 +28,7 @@ class PrintlnFunction : Builtin {
 }
 
 class InputFunction : Builtin {
-    override Object call(Object[] args) {
+    override DycaObject call(DycaObject[] args) { 
         string prompt = "";
         if (args.length > 0) {
             prompt = args[0].inspect();

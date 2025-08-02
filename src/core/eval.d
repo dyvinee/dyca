@@ -131,7 +131,7 @@ class Evaluator {
             case "-":
                 return evalMinusPrefixOperatorExpression(right);
             default:
-                return new Error("unknown operator: %s%s".format(op, right.objectType()));
+                return new DycaError("unknown operator: %s%s".format(op, right.objectType()));
         }
     }
 
@@ -143,7 +143,7 @@ class Evaluator {
 
     static Object evalMinusPrefixOperatorExpression(Object right) {
         if (right.objectType() != "INTEGER") {
-            return new Error("unknown operator: -%s".format(right.objectType()));
+            return new DycaError("unknown operator: -%s".format(right.objectType()));
         }
         
         long value = (cast(Integer)right).value;
@@ -164,11 +164,11 @@ class Evaluator {
             return nativeBoolToBooleanObject(left != right);
         }
         else if (left.objectType() != right.objectType()) {
-            return new Error("type mismatch: %s %s %s".format(
+            return new DycaError("type mismatch: %s %s %s".format(
                 left.objectType(), op, right.objectType()));
         }
         else {
-            return new Error("unknown operator: %s %s %s".format(
+            return new DycaError("unknown operator: %s %s %s".format(
                 left.objectType(), op, right.objectType()));
         }
     }
@@ -195,14 +195,14 @@ class Evaluator {
             case "!=":
                 return nativeBoolToBooleanObject(leftVal != rightVal);
             default:
-                return new Error("unknown operator: %s %s %s".format(
+                return new DycaError("unknown operator: %s %s %s".format(
                     left.objectType(), op, right.objectType()));
         }
     }
 
     static Object evalStringInfixExpression(string op, Object left, Object right) {
         if (op != "+") {
-            return new Error("unknown operator: %s %s %s".format(
+            return new DycaError("unknown operator: %s %s %s".format(
                 left.objectType(), op, right.objectType()));
         }
         
@@ -233,7 +233,7 @@ class Evaluator {
             return builtin;
         }
         
-        return new Error("identifier not found: " ~ node.value);
+        return new DycaError("identifier not found: " ~ node.value);
     }
 
     static Object[] evalExpressions(Expression[] exprs, Environment env) {
@@ -252,15 +252,15 @@ class Evaluator {
 
     static Object applyFunction(Object fn, Object[] args) {
         if (auto func = cast(Function)fn) {
-            Environment extendedEnv = extendFunctionEnv(function, args);
-            Object evaluated = eval(function.body, extendedEnv);
+            Environment extendedEnv = extendFunctionEnv(func, args);
+            Object evaluated = eval(func.body, extendedEnv);
             return unwrapReturnValue(evaluated);
         }
         else if (auto builtin = cast(Builtin)fn) {
             return builtin.call(args);
         }
         else {
-            return new Error("not a function: %s".format(fn.objectType()));
+            return new DycaError("not a function: %s".format(fn.objectType()));
         }
     }
 
@@ -278,7 +278,7 @@ class Evaluator {
         if (left.objectType() == "ARRAY" && index.objectType() == "INTEGER") {
             return evalArrayIndexExpression(left, index);
         }
-        return new Error("index operator not supported: %s".format(left.objectType()));
+        return new DycaError("index operator not supported: %s".format(left.objectType()));
     }
 
     static Object evalArrayIndexExpression(Object array, Object index) {
@@ -334,7 +334,7 @@ class Evaluator {
 class LenFunction : Builtin {
     override Object call(Object[] args) {
         if (args.length != 1) {
-            return new Error("wrong number of arguments. got=%d, want=1".format(args.length));
+            return new DycaError("wrong number of arguments. got=%d, want=1".format(args.length));
         }
         
         if (auto str = cast(String)args[0]) {
@@ -344,18 +344,18 @@ class LenFunction : Builtin {
             return new Integer(arr.elements.length);
         }
         
-        return new Error("argument to `len` not supported, got %s".format(args[0].objectType()));
+        return new DycaError("argument to `len` not supported, got %s".format(args[0].objectType()));
     }
 }
 
 class FirstFunction : Builtin {
     override Object call(Object[] args) {
         if (args.length != 1) {
-            return new Error("wrong number of arguments. got=%d, want=1".format(args.length));
+            return new DycaError("wrong number of arguments. got=%d, want=1".format(args.length));
         }
         
         if (args[0].objectType() != "ARRAY") {
-            return new Error("argument to `first` must be ARRAY, got %s".format(args[0].objectType()));
+            return new DycaError("argument to `first` must be ARRAY, got %s".format(args[0].objectType()));
         }
         
         Object[] arr = (cast(Array)args[0]).elements;
