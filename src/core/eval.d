@@ -4,6 +4,7 @@ import core.ast;
 import core.object;
 import std.container : DList;
 import std.conv : to;
+import std.string : format;
 
 class Evaluator {
     static Object eval(Node node, Environment env) {

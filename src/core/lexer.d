@@ -13,7 +13,8 @@ class Lexer {
     char ch;
     string[] keywords = [
         "function", "if", "else", "return", 
-        "import", "export", "true", "false", "null"
+        "import", "export", "true", "false", "null",
+        "for", "as"
     ];
 
     this(string input) {
@@ -37,7 +38,12 @@ class Lexer {
 
         switch (ch) {
             case '=':
-                tok = new Token(TokenType.ASSIGN, ch.to!string);
+                if (peekChar() == '=') {
+                    readChar();
+                    tok = new Token(TokenType.EQ, "==");
+                } else {
+                    tok = new Token(TokenType.ASSIGN, ch.to!string);
+                }
             case ';':
                 tok = new Token(TokenType.SEMICOLON, ch.to!string);
             case '(':
@@ -51,7 +57,12 @@ class Lexer {
             case '-':
                 tok = new Token(TokenType.MINUS, ch.to!string);
             case '!':
-                tok = new Token(TokenType.BANG, ch.to!string);
+                if (peekChar() == '=') {
+                    readChar();
+                    tok = new Token(TokenType.NOT_EQ, "!=");
+                } else {
+                    tok = new Token(TokenType.BANG, ch.to!string);
+                }
             case '/':
                 tok = new Token(TokenType.SLASH, ch.to!string);
             case '*':
@@ -88,6 +99,14 @@ class Lexer {
 
         readChar();
         return tok;
+    }
+
+    char peekChar() {
+        if (readPosition >= input.length) {
+            return 0;
+        } else {
+            return input[readPosition];
+        }
     }
 
     void skipWhitespace() {
