@@ -25,8 +25,8 @@ void main(string[] args) {
         // (This would be more sophisticated in a real implementation)
         if (engine.hasPendingImports()) {
             foreach (importPath; engine.getPendingImports()) {
-                auto module = ModuleLoader.loadModule(importPath, basePath);
-                engine.registerModule(importPath, module);
+                auto moduleObj = ModuleLoader.loadModule(importPath, basePath);
+                engine.registerModule(importPath, moduleObj);
             }
         }
     } catch (Exception e) {

@@ -36,7 +36,7 @@ class Identifier : Expression {
 class ImportStatement : Statement {
     Token token;
     string[] path;
-    string alias;
+    string alias_;
     
     void statementNode() {}
     string tokenLiteral() { return token.literal; }
@@ -69,7 +69,7 @@ class FunctionLiteral : Expression {
 
 class CallExpression : Expression {
     Token token;
-    Expression function;
+    Expression function_;
     Expression[] arguments;
     
     void expressionNode() {}

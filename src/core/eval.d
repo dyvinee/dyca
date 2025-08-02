@@ -68,15 +68,15 @@ class Evaluator {
             return new Function(expr.parameters, expr.body, env);
         }
         else if (auto expr = cast(CallExpression)node) {
-            Object function = eval(expr.function, env);
-            if (isError(function)) return function;
+            Object func = eval(expr.function_, env);
+            if (isError(func)) return func;
             
             Object[] args = evalExpressions(expr.arguments, env);
             if (args.length == 1 && isError(args[0])) {
                 return args[0];
             }
             
-            return applyFunction(function, args);
+            return applyFunction(func, args);
         }
         else if (auto expr = cast(IndexExpression)node) {
             Object left = eval(expr.left, env);
@@ -251,7 +251,7 @@ class Evaluator {
     }
 
     static Object applyFunction(Object fn, Object[] args) {
-        if (auto function = cast(Function)fn) {
+        if (auto func = cast(Function)fn) {
             Environment extendedEnv = extendFunctionEnv(function, args);
             Object evaluated = eval(function.body, extendedEnv);
             return unwrapReturnValue(evaluated);
