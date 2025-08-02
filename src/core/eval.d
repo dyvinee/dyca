@@ -264,11 +264,11 @@ class Evaluator {
         }
     }
 
-    static Environment extendFunctionEnv(Function fn, Object[] args) {
-        Environment env = new Environment(fn.env);
+    static Environment extendFunctionEnv(Function func, Object[] args) {
+        Environment env = new Environment(func.env);
         
-        for (size_t i = 0; i < fn.parameters.length; i++) {
-            env.set(fn.parameters[i].value, args[i]);
+        for (size_t i = 0; i < func.parameters.length; i++) {
+            env.set(func.parameters[i].value, args[i]);
         }
         
         return env;

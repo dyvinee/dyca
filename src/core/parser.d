@@ -146,7 +146,7 @@ class Parser {
             if (!expectPeek(TokenType.IDENT)) {
                 return null;
             }
-            stmt.alias = curToken.literal;
+            stmt.alias_ = curToken.literal;
         }
         
         if (!expectPeek(TokenType.SEMICOLON)) {
@@ -386,8 +386,8 @@ class Parser {
         return identifiers;
     }
     
-    Expression parseCallExpression(Expression function) {
-        CallExpression exp = new CallExpression(curToken, function);
+    Expression parseCallExpression(Expression func) {
+        auto exp = new CallExpression(curToken, func);
         exp.arguments = parseExpressionList(TokenType.RPAREN);
         return exp;
     }

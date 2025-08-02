@@ -4,7 +4,7 @@ import std.stdio;
 import std.string;
 import std.array;
 
-interface Object {
+interface DycaObject {
     string objectType();
     string inspect();
 }
@@ -41,7 +41,7 @@ class ReturnValue : Object {
     override string inspect() { return value.inspect(); }
 }
 
-class Error : Object {
+class DycaError : Object {
     string message;
     
     this(string message) { this.message = message; }
