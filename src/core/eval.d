@@ -1,11 +1,12 @@
 module core.eval;
 
-import core.ast;
-import core.object;
+import std.stdio;
 import std.container : DList;
 import std.conv : to;
 import std.format : format;
 import std.string : join;
+import core.ast;
+import core.object;
 
 class Evaluator {
     static Null NULL;
@@ -262,12 +263,12 @@ class Evaluator {
     }
 
     static DycaObject applyFunction(DycaObject fn, DycaObject[] args) {
-        if (auto func = cast(Function)fn)) {
+        if (auto func = cast(Function)fn) {
             Environment extendedEnv = extendFunctionEnv(func, args);
             DycaObject evaluated = eval(func.body, extendedEnv);
             return unwrapReturnValue(evaluated);
         }
-        else if (auto builtin = cast(Builtin)fn)) {
+        else if (auto builtin = cast(Builtin)fn) {
             return builtin.call(args);
         }
         else {
@@ -304,7 +305,7 @@ class Evaluator {
     }
 
     static DycaObject unwrapReturnValue(DycaObject obj) {
-        if (auto returnVal = cast(ReturnValue)obj)) {
+        if (auto returnVal = cast(ReturnValue)obj) {
             return returnVal.value;
         }
         return obj;
@@ -341,10 +342,10 @@ class LenFunction : Builtin {
             return new DycaError("wrong number of arguments. got=%d, want=1".format(args.length));
         }
         
-        if (auto str = cast(String)args[0])) {
+        if (auto str = cast(String)args[0]) {
             return new Integer(str.value.length);
         }
-        else if (auto arr = cast(Array)args[0])) {
+        else if (auto arr = cast(Array)args[0]) {
             return new Integer(arr.elements.length);
         }
         

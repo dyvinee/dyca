@@ -1,5 +1,6 @@
 module core.lexer;
 
+import std.conv : to;
 import std.array : appender;
 import std.algorithm : find;
 import std.ascii : isDigit, isAlpha, isWhite;

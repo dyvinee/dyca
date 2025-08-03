@@ -1,5 +1,9 @@
 module core.ast;
 
+
+import std.array;
+import std.conv;
+import std.stdio;
 import core.object;
 import syntax.token : Token;
 
@@ -13,6 +17,7 @@ interface Statement : Node {
 
 interface Expression : Node {
     void expressionNode();
+    string toString();
 }
 
 class Program {

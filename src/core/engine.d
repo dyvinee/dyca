@@ -1,11 +1,13 @@
 module core.engine;
 
+import std.stdio;
+import std.file;
+import std.path;
 import core.lexer;
 import core.parser;
 import core.eval;
 import core.object;
-import std.file;
-import std.path;
+import stdlib.io;
 
 class DycaEngine {
     Environment globalEnv;
