@@ -6,7 +6,6 @@ import std.container : DList;
 import std.conv : to;
 import std.format : format;
 import std.string : join;
-import core.ast : Function;
 
 class Evaluator {
     static Null NULL;
@@ -19,17 +18,18 @@ class Evaluator {
         FALSE = new Boolean(false);
     }
 
-    static Object eval(Node node, Environment env) {
+    static DycaObject eval(Node node, Environment env) {
         if (auto prog = cast(Program)node) {
             return evalProgram(prog, env);
         }
         else if (auto stmt = cast(LetStatement)node) {
-            Object val = eval(stmt.value, env);
+            DycaObject val = eval(stmt.value, env);
             if (isError(val)) return val;
             env.set(stmt.name.value, val);
+            return val;
         }
         else if (auto stmt = cast(ReturnStatement)node) {
-            Object val = eval(stmt.returnValue, env);
+            DycaObject val = eval(stmt.returnValue, env);
             if (isError(val)) return val;
             return new ReturnValue(val);
         }
@@ -49,7 +49,7 @@ class Evaluator {
             return new String(expr.value);
         }
         else if (auto expr = cast(ArrayLiteral)node) {
-            Object[] elements = evalExpressions(expr.elements, env);
+            DycaObject[] elements = evalExpressions(expr.elements, env);
             if (elements.length == 1 && isError(elements[0])) {
                 return elements[0];
             }
@@ -59,15 +59,15 @@ class Evaluator {
             return evalIdentifier(expr, env);
         }
         else if (auto expr = cast(PrefixExpression)node) {
-            Object right = eval(expr.right, env);
+            DycaObject right = eval(expr.right, env);
             if (isError(right)) return right;
             return evalPrefixExpression(expr.operator, right);
         }
         else if (auto expr = cast(InfixExpression)node) {
-            Object left = eval(expr.left, env);
+            DycaObject left = eval(expr.left, env);
             if (isError(left)) return left;
             
-            Object right = eval(expr.right, env);
+            DycaObject right = eval(expr.right, env);
             if (isError(right)) return right;
             
             return evalInfixExpression(expr.operator, left, right);
@@ -79,10 +79,10 @@ class Evaluator {
             return new Function(expr.parameters, expr.body, env);
         }
         else if (auto expr = cast(CallExpression)node) {
-            Object func = eval(expr.function_, env);
+            DycaObject func = eval(expr.function_, env);
             if (isError(func)) return func;
             
-            Object[] args = evalExpressions(expr.arguments, env);
+            DycaObject[] args = evalExpressions(expr.arguments, env);
             if (args.length == 1 && isError(args[0])) {
                 return args[0];
             }
@@ -90,10 +90,10 @@ class Evaluator {
             return applyFunction(func, args);
         }
         else if (auto expr = cast(IndexExpression)node) {
-            Object left = eval(expr.left, env);
+            DycaObject left = eval(expr.left, env);
             if (isError(left)) return left;
             
-            Object index = eval(expr.index, env);
+            DycaObject index = eval(expr.index, env);
             if (isError(index)) return index;
             
             return evalIndexExpression(left, index);
@@ -102,8 +102,8 @@ class Evaluator {
         return NULL;
     }
 
-    static Object evalProgram(Program program, Environment env) {
-        Object result;
+    static DycaObject evalProgram(Program program, Environment env) {
+        DycaObject result;
         
         foreach (stmt; program.statements) {
             result = eval(stmt, env);
@@ -119,8 +119,8 @@ class Evaluator {
         return result;
     }
 
-    static Object evalBlockStatement(BlockStatement block, Environment env) {
-        Object result;
+    static DycaObject evalBlockStatement(BlockStatement block, Environment env) {
+        DycaObject result;
         
         foreach (stmt; block.statements) {
             result = eval(stmt, env);
@@ -135,7 +135,7 @@ class Evaluator {
         return result;
     }
 
-    static Object evalPrefixExpression(string op, Object right) {
+    static DycaObject evalPrefixExpression(string op, DycaObject right) {
         switch (op) {
             case "!":
                 return evalBangOperatorExpression(right);
@@ -146,13 +146,13 @@ class Evaluator {
         }
     }
 
-    static Object evalBangOperatorExpression(Object right) {
+    static DycaObject evalBangOperatorExpression(DycaObject right) {
         if (right is NULL) return TRUE;
         if (right is FALSE) return TRUE;
         return FALSE;
     }
 
-    static Object evalMinusPrefixOperatorExpression(Object right) {
+    static DycaObject evalMinusPrefixOperatorExpression(DycaObject right) {
         if (right.objectType() != "INTEGER") {
             return new DycaError("unknown operator: -%s".format(right.objectType()));
         }
@@ -161,7 +161,7 @@ class Evaluator {
         return new Integer(-value);
     }
 
-    static Object evalInfixExpression(string op, Object left, Object right) {
+    static DycaObject evalInfixExpression(string op, DycaObject left, DycaObject right) {
         if (left.objectType() == "INTEGER" && right.objectType() == "INTEGER") {
             return evalIntegerInfixExpression(op, left, right);
         }
@@ -184,7 +184,7 @@ class Evaluator {
         }
     }
 
-    static Object evalIntegerInfixExpression(string op, Object left, Object right) {
+    static DycaObject evalIntegerInfixExpression(string op, DycaObject left, DycaObject right) {
         long leftVal = (cast(Integer)left).value;
         long rightVal = (cast(Integer)right).value;
         
@@ -211,7 +211,7 @@ class Evaluator {
         }
     }
 
-    static Object evalStringInfixExpression(string op, Object left, Object right) {
+    static DycaObject evalStringInfixExpression(string op, DycaObject left, DycaObject right) {
         if (op != "+") {
             return new DycaError("unknown operator: %s %s %s".format(
                 left.objectType(), op, right.objectType()));
@@ -222,8 +222,8 @@ class Evaluator {
         return new String(leftVal ~ rightVal);
     }
 
-    static Object evalIfExpression(IfExpression expr, Environment env) {
-        Object condition = eval(expr.condition, env);
+    static DycaObject evalIfExpression(IfExpression expr, Environment env) {
+        DycaObject condition = eval(expr.condition, env);
         if (isError(condition)) return condition;
         
         if (isTruthy(condition)) {
@@ -235,7 +235,7 @@ class Evaluator {
         }
     }
 
-    static Object evalIdentifier(Identifier node, Environment env) {
+    static DycaObject evalIdentifier(Identifier node, Environment env) {
         if (auto val = env.get(node.value)) {
             return val;
         }
@@ -247,11 +247,11 @@ class Evaluator {
         return new DycaError("identifier not found: " ~ node.value);
     }
 
-    static Object[] evalExpressions(Expression[] exprs, Environment env) {
-        Object[] result;
+    static DycaObject[] evalExpressions(Expression[] exprs, Environment env) {
+        DycaObject[] result;
         
         foreach (expr; exprs) {
-            Object evaluated = eval(expr, env);
+            DycaObject evaluated = eval(expr, env);
             if (isError(evaluated)) {
                 return [evaluated];
             }
@@ -261,13 +261,13 @@ class Evaluator {
         return result;
     }
 
-    static Object applyFunction(Object fn, Object[] args) {
-        if (auto func = cast(Function)fn) {
+    static DycaObject applyFunction(DycaObject fn, DycaObject[] args) {
+        if (auto func = cast(Function)fn)) {
             Environment extendedEnv = extendFunctionEnv(func, args);
-            Object evaluated = eval(func.body, extendedEnv);
+            DycaObject evaluated = eval(func.body, extendedEnv);
             return unwrapReturnValue(evaluated);
         }
-        else if (auto builtin = cast(Builtin)fn) {
+        else if (auto builtin = cast(Builtin)fn)) {
             return builtin.call(args);
         }
         else {
@@ -275,7 +275,7 @@ class Evaluator {
         }
     }
 
-    static Environment extendFunctionEnv(Function func, Object[] args) {
+    static Environment extendFunctionEnv(Function func, DycaObject[] args) {
         Environment env = new Environment(func.env);
         
         for (size_t i = 0; i < func.parameters.length; i++) {
@@ -285,15 +285,15 @@ class Evaluator {
         return env;
     }
 
-    static Object evalIndexExpression(Object left, Object index) {
+    static DycaObject evalIndexExpression(DycaObject left, DycaObject index) {
         if (left.objectType() == "ARRAY" && index.objectType() == "INTEGER") {
             return evalArrayIndexExpression(left, index);
         }
         return new DycaError("index operator not supported: %s".format(left.objectType()));
     }
 
-    static Object evalArrayIndexExpression(Object array, Object index) {
-        Object[] elements = (cast(Array)array).elements;
+    static DycaObject evalArrayIndexExpression(DycaObject array, DycaObject index) {
+        DycaObject[] elements = (cast(Array)array).elements;
         long idx = (cast(Integer)index).value;
         
         if (idx < 0 || idx >= elements.length) {
@@ -303,8 +303,8 @@ class Evaluator {
         return elements[idx];
     }
 
-    static Object unwrapReturnValue(Object obj) {
-        if (auto returnVal = cast(ReturnValue)obj) {
+    static DycaObject unwrapReturnValue(DycaObject obj) {
+        if (auto returnVal = cast(ReturnValue)obj)) {
             return returnVal.value;
         }
         return obj;
@@ -314,18 +314,17 @@ class Evaluator {
         return input ? TRUE : FALSE;
     }
 
-    static bool isTruthy(Object obj) {
+    static bool isTruthy(DycaObject obj) {
         if (obj is NULL) return false;
         if (obj is FALSE) return false;
         if (obj is TRUE) return true;
         return true;
     }
 
-    static bool isError(Object obj) {
+    static bool isError(DycaObject obj) {
         return obj !is null && obj.objectType() == "ERROR";
     }
 
-    // Built-in functions
     static Builtin[string] builtins = [
         "len": new LenFunction(),
         "first": new FirstFunction(),
@@ -337,15 +336,15 @@ class Evaluator {
 }
 
 class LenFunction : Builtin {
-    override Object call(Object[] args) {
+    override DycaObject call(DycaObject[] args) {
         if (args.length != 1) {
             return new DycaError("wrong number of arguments. got=%d, want=1".format(args.length));
         }
         
-        if (auto str = cast(String)args[0]) {
+        if (auto str = cast(String)args[0])) {
             return new Integer(str.value.length);
         }
-        else if (auto arr = cast(Array)args[0]) {
+        else if (auto arr = cast(Array)args[0])) {
             return new Integer(arr.elements.length);
         }
         
@@ -354,7 +353,7 @@ class LenFunction : Builtin {
 }
 
 class FirstFunction : Builtin {
-    override Object call(Object[] args) {
+    override DycaObject call(DycaObject[] args) {
         if (args.length != 1) {
             return new DycaError("wrong number of arguments. got=%d, want=1".format(args.length));
         }
@@ -363,7 +362,7 @@ class FirstFunction : Builtin {
             return new DycaError("argument to `first` must be ARRAY, got %s".format(args[0].objectType()));
         }
         
-        Object[] arr = (cast(Array)args[0]).elements;
+        DycaObject[] arr = (cast(Array)args[0]).elements;
         if (arr.length > 0) {
             return arr[0];
         }
@@ -373,7 +372,7 @@ class FirstFunction : Builtin {
 }
 
 class LastFunction : Builtin {
-    override Object call(Object[] args) {
+    override DycaObject call(DycaObject[] args) {
         if (args.length != 1) {
             return new DycaError("wrong number of arguments. got=%d, want=1".format(args.length));
         }
@@ -382,7 +381,7 @@ class LastFunction : Builtin {
             return new DycaError("argument to `last` must be ARRAY, got %s".format(args[0].objectType()));
         }
         
-        Object[] arr = (cast(Array)args[0]).elements;
+        DycaObject[] arr = (cast(Array)args[0]).elements;
         if (arr.length > 0) {
             return arr[$-1];
         }
@@ -392,7 +391,7 @@ class LastFunction : Builtin {
 }
 
 class RestFunction : Builtin {
-    override Object call(Object[] args) {
+    override DycaObject call(DycaObject[] args) {
         if (args.length != 1) {
             return new DycaError("wrong number of arguments. got=%d, want=1".format(args.length));
         }
@@ -401,7 +400,7 @@ class RestFunction : Builtin {
             return new DycaError("argument to `rest` must be ARRAY, got %s".format(args[0].objectType()));
         }
         
-        Object[] arr = (cast(Array)args[0]).elements;
+        DycaObject[] arr = (cast(Array)args[0]).elements;
         if (arr.length == 0) {
             return Evaluator.NULL;
         }
@@ -411,7 +410,7 @@ class RestFunction : Builtin {
 }
 
 class PushFunction : Builtin {
-    override Object call(Object[] args) {
+    override DycaObject call(DycaObject[] args) {
         if (args.length != 2) {
             return new DycaError("wrong number of arguments. got=%d, want=2".format(args.length));
         }
@@ -420,14 +419,14 @@ class PushFunction : Builtin {
             return new DycaError("first argument to `push` must be ARRAY, got %s".format(args[0].objectType()));
         }
         
-        Object[] arr = (cast(Array)args[0]).elements.dup;
+        DycaObject[] arr = (cast(Array)args[0]).elements.dup;
         arr ~= args[1];
         return new Array(arr);
     }
 }
 
 class PutsFunction : Builtin {
-    override Object call(Object[] args) {
+    override DycaObject call(DycaObject[] args) {
         foreach (arg; args) {
             writeln(arg.inspect());
         }

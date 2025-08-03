@@ -119,8 +119,8 @@ class ForExpression : Expression {
     string tokenLiteral() { return token.literal; }
 }
 
-
 class IntegerLiteral : Expression {
+    Token token;
     long value;
     
     this(Token token, long value) {
@@ -134,6 +134,7 @@ class IntegerLiteral : Expression {
 }
 
 class BooleanLiteral : Expression {
+    Token token;
     bool value;
     
     this(Token token, bool value) {
@@ -147,6 +148,7 @@ class BooleanLiteral : Expression {
 }
 
 class PrefixExpression : Expression {
+    Token token;
     string op;
     Expression right;
     
@@ -164,6 +166,7 @@ class PrefixExpression : Expression {
 }
 
 class InfixExpression : Expression {
+    Token token;
     Expression left;
     string op;
     Expression right;
@@ -181,7 +184,6 @@ class InfixExpression : Expression {
         return "(" ~ left.toString() ~ " " ~ op ~ " " ~ right.toString() ~ ")";
     }
 }
-
 
 class LetStatement : Statement {
     Token token;

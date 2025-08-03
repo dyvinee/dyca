@@ -33,9 +33,9 @@ class Null : DycaObject {
 }
 
 class ReturnValue : DycaObject {
-    Object value;
+    DycaObject value;
     
-    this(Object value) { this.value = value; }
+    this(DycaObject value) { this.value = value; }
     
     override string objectType() { return "RETURN_VALUE"; }
     override string inspect() { return value.inspect(); }
@@ -48,6 +48,30 @@ class DycaError : DycaObject {
     
     override string objectType() { return "ERROR"; }
     override string inspect() { return "Error: " ~ message; }
+}
+
+class Array : DycaObject {
+    DycaObject[] elements;
+    
+    this(DycaObject[] elements) { this.elements = elements; }
+    
+    override string objectType() { return "ARRAY"; }
+    override string inspect() {
+        string[] elementsStr;
+        foreach (e; elements) {
+            elementsStr ~= e.inspect();
+        }
+        return "[" ~ join(elementsStr, ", ") ~ "]";
+    }
+}
+
+class String : DycaObject {
+    string value;
+    
+    this(string value) { this.value = value; }
+    
+    override string objectType() { return "STRING"; }
+    override string inspect() { return value; }
 }
 
 class Environment {

@@ -1,20 +1,9 @@
 module stdlib.io;
 
-import core.object : DycaObject, DycaError, Null;
+import core.object : DycaObject, DycaError, Null, String;
 import core.ast : Builtin;
 import std.stdio : write, writeln, readln;
 import std.conv : to;
-
-
-class String : DycaObject {
-    string value;
-    
-    this(string value) { this.value = value; }
-    
-    override string objectType() { return "STRING"; }
-    override string inspect() { return value; }
-}
-
 
 class PrintFunction : Builtin {
     override DycaObject call(DycaObject[] args) { 
@@ -42,7 +31,11 @@ class InputFunction : Builtin {
     override DycaObject call(DycaObject[] args) { 
         string prompt = "";
         if (args.length > 0) {
-            prompt = args[0].inspect();
+            if (auto str = cast(String)args[0]) {
+                prompt = str.value;
+            } else {
+                return new DycaError("input prompt must be a string, got %s".format(args[0].objectType()));
+            }
         }
         
         write(prompt);
