@@ -69,6 +69,13 @@ class ImportStatement : Statement {
     
     void statementNode() {}
     string tokenLiteral() { return token.literal; }
+    override string toString() {
+        string s = "import " ~ join(path, ".");
+        if (alias_.length > 0) {
+            s ~= " as " ~ alias_;
+        }
+        return s;
+    }
 }
 
 class ExportStatement : Statement {
@@ -77,6 +84,9 @@ class ExportStatement : Statement {
     
     void statementNode() {}
     string tokenLiteral() { return token.literal; }
+    override string toString() {
+        return "export " ~ join(path, ".");
+    }
 }
 
 class BlockStatement : Statement {
@@ -231,6 +241,9 @@ class LetStatement : Statement {
     
     void statementNode() {}
     string tokenLiteral() { return token.literal; }
+    override string toString() {
+        return tokenLiteral() ~ " " ~ name.toString() ~ " = " ~ value.toString() ~ ";";
+    }
 }
 
 class ReturnStatement : Statement {
@@ -239,6 +252,9 @@ class ReturnStatement : Statement {
     
     void statementNode() {}
     string tokenLiteral() { return token.literal; }
+    override string toString() {
+        return tokenLiteral() ~ " " ~ returnValue.toString() ~ ";";
+    }
 }
 
 class ExpressionStatement : Statement {
@@ -247,6 +263,9 @@ class ExpressionStatement : Statement {
     
     void statementNode() {}
     string tokenLiteral() { return token.literal; }
+    override string toString() {
+        return expression.toString() ~ ";";
+    }
 }
 
 class StringLiteral : Expression {
