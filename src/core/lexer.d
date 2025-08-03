@@ -45,18 +45,25 @@ class Lexer {
                 } else {
                     tok = new Token(TokenType.ASSIGN, ch.to!string);
                 }
+                break;
             case ';':
                 tok = new Token(TokenType.SEMICOLON, ch.to!string);
+                break;
             case '(':
                 tok = new Token(TokenType.LPAREN, ch.to!string);
+                break;
             case ')':
                 tok = new Token(TokenType.RPAREN, ch.to!string);
+                break;
             case ',':
                 tok = new Token(TokenType.COMMA, ch.to!string);
+                break;
             case '+':
                 tok = new Token(TokenType.PLUS, ch.to!string);
+                break;
             case '-':
                 tok = new Token(TokenType.MINUS, ch.to!string);
+                break;
             case '!':
                 if (peekChar() == '=') {
                     readChar();
@@ -64,28 +71,40 @@ class Lexer {
                 } else {
                     tok = new Token(TokenType.BANG, ch.to!string);
                 }
+                break;
             case '/':
                 tok = new Token(TokenType.SLASH, ch.to!string);
+                break;
             case '*':
                 tok = new Token(TokenType.ASTERISK, ch.to!string);
+                break;
             case '<':
                 tok = new Token(TokenType.LT, ch.to!string);
+                break;
             case '>':
                 tok = new Token(TokenType.GT, ch.to!string);
+                break;
             case '{':
                 tok = new Token(TokenType.LBRACE, ch.to!string);
+                break;
             case '}':
                 tok = new Token(TokenType.RBRACE, ch.to!string);
+                break;
             case '"':
                 tok = new Token(TokenType.STRING, readString());
+                break;
             case '[':
                 tok = new Token(TokenType.LBRACKET, ch.to!string);
+                break;
             case ']':
                 tok = new Token(TokenType.RBRACKET, ch.to!string);
+                break;
             case ':':
                 tok = new Token(TokenType.COLON, ch.to!string);
+                break;
             case 0:
                 tok = new Token(TokenType.EOF, "");
+                break;
             default:
                 if (isLetter(ch)) {
                     string ident = readIdentifier();

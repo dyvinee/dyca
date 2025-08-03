@@ -7,6 +7,8 @@ import core.lexer;
 import core.parser;
 import core.eval;
 import core.object;
+import core.ast : Program;
+import core.object : DycaObject;
 import stdlib.io;
 
 class DycaEngine {

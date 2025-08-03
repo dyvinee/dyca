@@ -1,9 +1,9 @@
 module core.ast;
 
-
 import std.array;
 import std.conv;
 import std.stdio;
+import std.string;
 import core.object;
 import syntax.token : Token;
 
@@ -13,6 +13,7 @@ interface Node {
 
 interface Statement : Node {
     void statementNode();
+    string toString();
 }
 
 interface Expression : Node {
@@ -58,6 +59,7 @@ class Identifier : Expression {
     
     void expressionNode() {}
     string tokenLiteral() { return token.literal; }
+    override string toString() { return value; }
 }
 
 class ImportStatement : Statement {
@@ -83,6 +85,13 @@ class BlockStatement : Statement {
     
     void statementNode() {}
     string tokenLiteral() { return token.literal; }
+    override string toString() {
+        string[] stmts;
+        foreach (s; statements) {
+            stmts ~= s.toString();
+        }
+        return "{\n" ~ join(stmts, "\n") ~ "\n}";
+    }
 }
 
 class FunctionLiteral : Expression {
@@ -92,6 +101,13 @@ class FunctionLiteral : Expression {
     
     void expressionNode() {}
     string tokenLiteral() { return token.literal; }
+    override string toString() {
+        string[] params;
+        foreach (p; parameters) {
+            params ~= p.toString();
+        }
+        return tokenLiteral() ~ "(" ~ join(params, ", ") ~ ") " ~ body.toString();
+    }
 }
 
 class CallExpression : Expression {
@@ -101,6 +117,13 @@ class CallExpression : Expression {
     
     void expressionNode() {}
     string tokenLiteral() { return token.literal; }
+    override string toString() {
+        string[] args;
+        foreach (arg; arguments) {
+            args ~= arg.toString();
+        }
+        return function_.toString() ~ "(" ~ join(args, ", ") ~ ")";
+    }
 }
 
 class IfExpression : Expression {
@@ -111,6 +134,13 @@ class IfExpression : Expression {
     
     void expressionNode() {}
     string tokenLiteral() { return token.literal; }
+    override string toString() {
+        string s = "if" ~ condition.toString() ~ " " ~ consequence.toString();
+        if (alternative !is null) {
+            s ~= " else " ~ alternative.toString();
+        }
+        return s;
+    }
 }
 
 class ForExpression : Expression {
@@ -122,6 +152,10 @@ class ForExpression : Expression {
     
     void expressionNode() {}
     string tokenLiteral() { return token.literal; }
+    override string toString() {
+        return "for(" ~ init.toString() ~ "; " ~ condition.toString() ~ "; " ~ 
+               update.toString() ~ ") " ~ body.toString();
+    }
 }
 
 class IntegerLiteral : Expression {
@@ -221,6 +255,7 @@ class StringLiteral : Expression {
     
     void expressionNode() {}
     string tokenLiteral() { return token.literal; }
+    override string toString() { return value; }
 }
 
 class ArrayLiteral : Expression {
@@ -229,6 +264,13 @@ class ArrayLiteral : Expression {
     
     void expressionNode() {}
     string tokenLiteral() { return token.literal; }
+    override string toString() {
+        string[] elems;
+        foreach (e; elements) {
+            elems ~= e.toString();
+        }
+        return "[" ~ join(elems, ", ") ~ "]";
+    }
 }
 
 class IndexExpression : Expression {
@@ -238,6 +280,9 @@ class IndexExpression : Expression {
     
     void expressionNode() {}
     string tokenLiteral() { return token.literal; }
+    override string toString() {
+        return "(" ~ left.toString() ~ "[" ~ index.toString() ~ "])";
+    }
 }
 
 class Builtin : DycaObject {

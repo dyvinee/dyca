@@ -62,7 +62,7 @@ class Evaluator {
         else if (auto expr = cast(PrefixExpression)node) {
             DycaObject right = eval(expr.right, env);
             if (isError(right)) return right;
-            return evalPrefixExpression(expr.operator, right);
+            return evalPrefixExpression(expr.op, right);
         }
         else if (auto expr = cast(InfixExpression)node) {
             DycaObject left = eval(expr.left, env);
@@ -71,7 +71,7 @@ class Evaluator {
             DycaObject right = eval(expr.right, env);
             if (isError(right)) return right;
             
-            return evalInfixExpression(expr.operator, left, right);
+            return evalInfixExpression(expr.op, left, right);
         }
         else if (auto expr = cast(IfExpression)node) {
             return evalIfExpression(expr, env);
