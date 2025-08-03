@@ -11,6 +11,8 @@ import core.ast : Program, Statement, Expression, LetStatement, ReturnStatement,
                   BooleanLiteral, PrefixExpression, InfixExpression, IfExpression,
                   FunctionLiteral, CallExpression, ImportStatement, ExportStatement,
                   StringLiteral, ArrayLiteral, IndexExpression;
+import core.lexer : Lexer;
+
 
 class Parser {
     Lexer lexer;
@@ -449,15 +451,15 @@ class Parser {
     }
     
     static Precedence[TokenType] tokenPrecedences = [
-        TokenType.EQ: EQUALS,
-        TokenType.NOT_EQ: EQUALS,
-        TokenType.LT: LESSGREATER,
-        TokenType.GT: LESSGREATER,
-        TokenType.PLUS: SUM,
-        TokenType.MINUS: SUM,
-        TokenType.SLASH: PRODUCT,
-        TokenType.ASTERISK: PRODUCT,
-        TokenType.LPAREN: CALL,
-        TokenType.LBRACKET: INDEX
+        TokenType.EQ: Precedence.EQUALS,
+        TokenType.NOT_EQ: Precedence.EQUALS,
+        TokenType.LT: Precedence.LESSGREATER,
+        TokenType.GT: Precedence.LESSGREATER,
+        TokenType.PLUS: Precedence.SUM,
+        TokenType.MINUS: Precedence.SUM,
+        TokenType.SLASH: Precedence.PRODUCT,
+        TokenType.ASTERISK: Precedence.PRODUCT,
+        TokenType.LPAREN: Precedence.CALL,
+        TokenType.LBRACKET: Precedence.INDEX
     ];
 }

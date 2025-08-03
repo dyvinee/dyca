@@ -1,9 +1,20 @@
 module stdlib.io;
 
-import core.object : DycaObject, DycaError, Null, String;
+import core.object : DycaObject, DycaError, Null;
 import core.ast : Builtin;
 import std.stdio : write, writeln, readln;
 import std.conv : to;
+
+
+class String : DycaObject {
+    string value;
+    
+    this(string value) { this.value = value; }
+    
+    override string objectType() { return "STRING"; }
+    override string inspect() { return value; }
+}
+
 
 class PrintFunction : Builtin {
     override DycaObject call(DycaObject[] args) { 

@@ -55,7 +55,7 @@ class Token {
         this.literal = literal;
     }
     
-    string toString() {
+    override string toString() {
         return `Token(type: ` ~ type.to!string ~ `, literal: "` ~ literal ~ `")`;
     }
 }

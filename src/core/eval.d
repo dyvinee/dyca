@@ -6,8 +6,19 @@ import std.container : DList;
 import std.conv : to;
 import std.format : format;
 import std.string : join;
+import core.ast : Function;
 
 class Evaluator {
+    static Null NULL;
+    static Boolean TRUE;
+    static Boolean FALSE;
+
+    static this() {
+        NULL = new Null();
+        TRUE = new Boolean(true);
+        FALSE = new Boolean(false);
+    }
+
     static Object eval(Node node, Environment env) {
         if (auto prog = cast(Program)node) {
             return evalProgram(prog, env);
@@ -88,7 +99,7 @@ class Evaluator {
             return evalIndexExpression(left, index);
         }
         
-        return null;
+        return NULL;
     }
 
     static Object evalProgram(Program program, Environment env) {
@@ -100,7 +111,7 @@ class Evaluator {
             if (auto returnVal = cast(ReturnValue)result) {
                 return returnVal.value;
             }
-            else if (auto err = cast(Error)result) {
+            else if (auto err = cast(DycaError)result) {
                 return err;
             }
         }
@@ -136,9 +147,9 @@ class Evaluator {
     }
 
     static Object evalBangOperatorExpression(Object right) {
-        if (right is NULL) return new Boolean(true);
-        if (right is FALSE) return new Boolean(true);
-        return new Boolean(false);
+        if (right is NULL) return TRUE;
+        if (right is FALSE) return TRUE;
+        return FALSE;
     }
 
     static Object evalMinusPrefixOperatorExpression(Object right) {
@@ -314,11 +325,6 @@ class Evaluator {
         return obj !is null && obj.objectType() == "ERROR";
     }
 
-    // Built-in constants
-    static Null NULL = new Null();
-    static Boolean TRUE = new Boolean(true);
-    static Boolean FALSE = new Boolean(false);
-
     // Built-in functions
     static Builtin[string] builtins = [
         "len": new LenFunction(),
@@ -330,7 +336,6 @@ class Evaluator {
     ];
 }
 
-// Built-in function implementations
 class LenFunction : Builtin {
     override Object call(Object[] args) {
         if (args.length != 1) {
@@ -364,6 +369,60 @@ class FirstFunction : Builtin {
         }
         
         return Evaluator.NULL;
+    }
+}
+
+class LastFunction : Builtin {
+    override Object call(Object[] args) {
+        if (args.length != 1) {
+            return new DycaError("wrong number of arguments. got=%d, want=1".format(args.length));
+        }
+        
+        if (args[0].objectType() != "ARRAY") {
+            return new DycaError("argument to `last` must be ARRAY, got %s".format(args[0].objectType()));
+        }
+        
+        Object[] arr = (cast(Array)args[0]).elements;
+        if (arr.length > 0) {
+            return arr[$-1];
+        }
+        
+        return Evaluator.NULL;
+    }
+}
+
+class RestFunction : Builtin {
+    override Object call(Object[] args) {
+        if (args.length != 1) {
+            return new DycaError("wrong number of arguments. got=%d, want=1".format(args.length));
+        }
+        
+        if (args[0].objectType() != "ARRAY") {
+            return new DycaError("argument to `rest` must be ARRAY, got %s".format(args[0].objectType()));
+        }
+        
+        Object[] arr = (cast(Array)args[0]).elements;
+        if (arr.length == 0) {
+            return Evaluator.NULL;
+        }
+        
+        return new Array(arr[1..$]);
+    }
+}
+
+class PushFunction : Builtin {
+    override Object call(Object[] args) {
+        if (args.length != 2) {
+            return new DycaError("wrong number of arguments. got=%d, want=2".format(args.length));
+        }
+        
+        if (args[0].objectType() != "ARRAY") {
+            return new DycaError("first argument to `push` must be ARRAY, got %s".format(args[0].objectType()));
+        }
+        
+        Object[] arr = (cast(Array)args[0]).elements.dup;
+        arr ~= args[1];
+        return new Array(arr);
     }
 }
 

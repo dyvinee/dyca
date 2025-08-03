@@ -1,5 +1,6 @@
 module core.ast;
 
+import core.object;
 import syntax.token : Token;
 
 interface Node {
@@ -22,6 +23,27 @@ class Program {
             return statements[0].tokenLiteral();
         }
         return "";
+    }
+}
+
+class Function : DycaObject {
+    Identifier[] parameters;
+    BlockStatement body;
+    Environment env;
+    
+    this(Identifier[] parameters, BlockStatement body, Environment env) {
+        this.parameters = parameters;
+        this.body = body;
+        this.env = env;
+    }
+    
+    override string objectType() { return "FUNCTION"; }
+    override string inspect() {
+        string[] params;
+        foreach (p; parameters) {
+            params ~= p.toString();
+        }
+        return "function(" ~ join(params, ", ") ~ ") {\n" ~ body.toString() ~ "\n}";
     }
 }
 
@@ -160,9 +182,60 @@ class InfixExpression : Expression {
     }
 }
 
-class Builtin : Object {
+
+class LetStatement : Statement {
+    Token token;
+    Identifier name;
+    Expression value;
+    
+    void statementNode() {}
+    string tokenLiteral() { return token.literal; }
+}
+
+class ReturnStatement : Statement {
+    Token token;
+    Expression returnValue;
+    
+    void statementNode() {}
+    string tokenLiteral() { return token.literal; }
+}
+
+class ExpressionStatement : Statement {
+    Token token;
+    Expression expression;
+    
+    void statementNode() {}
+    string tokenLiteral() { return token.literal; }
+}
+
+class StringLiteral : Expression {
+    Token token;
+    string value;
+    
+    void expressionNode() {}
+    string tokenLiteral() { return token.literal; }
+}
+
+class ArrayLiteral : Expression {
+    Token token;
+    Expression[] elements;
+    
+    void expressionNode() {}
+    string tokenLiteral() { return token.literal; }
+}
+
+class IndexExpression : Expression {
+    Token token;
+    Expression left;
+    Expression index;
+    
+    void expressionNode() {}
+    string tokenLiteral() { return token.literal; }
+}
+
+class Builtin : DycaObject {
     override string objectType() { return "BUILTIN"; }
     override string inspect() { return "builtin function"; }
     
-    abstract Object call(Object[] args);
+    abstract DycaObject call(DycaObject[] args);
 }
