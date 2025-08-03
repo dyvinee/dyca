@@ -5,6 +5,7 @@ import std.array : appender;
 import std.algorithm : find;
 import std.ascii : isDigit, isAlpha, isWhite;
 import std.string : strip;
+import std.algorithm : canFind;
 import syntax.token : Token, TokenType;
 
 class Lexer {
@@ -168,8 +169,12 @@ class Lexer {
         return c.isAlpha || c == '_' || c == '.';
     }
 
+    bool isKeyword(string ident) {
+        return canFind(keywords, ident);
+    }
+
     TokenType lookupIdent(string ident) {
-        if (ident in keywords) {
+        if (isKeyword(ident)) {
             return TokenType.fromString(ident);
         }
         return TokenType.IDENT;

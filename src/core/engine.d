@@ -37,7 +37,7 @@ class DycaEngine {
             return;
         }
         
-        Object evaluated = Evaluator.eval(program, globalEnv);
+        DycaObject evaluated = Evaluator.eval(program, globalEnv);
         if (evaluated !is null && evaluated.objectType() == "ERROR") {
             writeln(evaluated.inspect());
         }

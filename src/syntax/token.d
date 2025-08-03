@@ -33,14 +33,17 @@ enum TokenType {
     RBRACE,
     LBRACKET,
     RBRACKET,
+    DOT,
     
     // Keywords
     FUNCTION,
+    LET,
     IF,
     ELSE,
     RETURN,
     IMPORT,
     EXPORT,
+    AS,
     TRUE,
     FALSE,
     NULL

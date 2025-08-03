@@ -157,6 +157,22 @@ class Parser {
         
         return stmt;
     }
+
+    ExportStatement parseExportStatement() {
+        ExportStatement stmt = new ExportStatement(curToken);
+        
+        if (!expectPeek(TokenType.IDENT)) {
+            return null;
+        }
+        
+        stmt.path = parseIdentifierPath();
+        
+        if (!expectPeek(TokenType.SEMICOLON)) {
+            return null;
+        }
+        
+        return stmt;
+    }
     
     string[] parseIdentifierPath() {
         string[] path;
